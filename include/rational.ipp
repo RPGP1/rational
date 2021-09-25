@@ -8,17 +8,36 @@
 #include <stdexcept>
 
 template <std::signed_integral T>
-constexpr Rational<T>::Rational(NumeratorType numer, DenominatorType denom) : numer_{numer}, denom_{denom}
+constexpr auto Rational<T>::check_zero_denominator() const -> const Rational&
 {
-    if (denom_ == 0)
+    if (denom_ == 0) {
         throw std::range_error{"0 is given as denom of Rational"};
+    }
+    return *this;
+}
+template <std::signed_integral T>
+constexpr auto Rational<T>::reduction() noexcept -> Rational&
+{
     const auto gcd = std::gcd(numer_, static_cast<NumeratorType>(denom_));
     numer_ = static_cast<NumeratorType>(numer_ / gcd);
     denom_ = static_cast<DenominatorType>(denom_ / gcd);
+    return *this;
+}
+
+template <std::signed_integral T>
+constexpr Rational<T>::Rational(NumeratorType numer, DenominatorType denom) : Rational{simple_copy_, numer, denom}
+{
+    check_zero_denominator();
+    reduction();
 }
 template <std::signed_integral T>
 constexpr Rational<T>::Rational(NumeratorType numer, NumeratorType denom)
     : Rational{static_cast<NumeratorType>(std::signbit(denom) ? -numer : numer), static_cast<DenominatorType>(std::abs(denom))}
+{
+}
+template <std::signed_integral T>
+constexpr Rational<T>::Rational(SimpleCopy, NumeratorType numer, DenominatorType denom)
+    : numer_{numer}, denom_{denom}
 {
 }
 
@@ -32,18 +51,18 @@ constexpr Rational<T>::operator U() const noexcept
 template <std::signed_integral T>
 constexpr auto Rational<T>::operator+() const noexcept -> Rational
 {
-    return Rational{numer_, denom_};
+    return *this;
 }
 template <std::signed_integral T>
 constexpr auto Rational<T>::operator-() const noexcept -> Rational
 {
-    return Rational{static_cast<NumeratorType>(-numer_), denom_};
+    return Rational{simple_copy_, static_cast<NumeratorType>(-numer_), denom_};
 }
 template <std::signed_integral T>
 constexpr auto Rational<T>::inverse() const -> Rational
 {
     auto tmp = static_cast<NumeratorType>(denom_);
-    return Rational{static_cast<NumeratorType>(numer_ < 0 ? -tmp : tmp), static_cast<DenominatorType>(std::abs(numer_))};
+    return Rational{simple_copy_, static_cast<NumeratorType>(numer_ < 0 ? -tmp : tmp), static_cast<DenominatorType>(std::abs(numer_))}.check_zero_denominator();
 }
 
 template <std::signed_integral T>
@@ -52,10 +71,12 @@ constexpr auto Rational<T>::operator+=(const Rational& other) noexcept -> Ration
     const auto gcd = std::gcd(denom_, other.denom_);
     const auto this_denom_coeff = denom_ / gcd, other_denom_coeff = other.denom_ / gcd;
 
-    return *this = Rational{static_cast<NumeratorType>(
-                                numer_ * static_cast<NumeratorType>(other_denom_coeff)
-                                + static_cast<NumeratorType>(this_denom_coeff) * other.numer_),
-               static_cast<DenominatorType>(denom_ * other_denom_coeff)};
+    return *this = Rational{simple_copy_,
+               static_cast<NumeratorType>(
+                   numer_ * static_cast<NumeratorType>(other_denom_coeff)
+                   + static_cast<NumeratorType>(this_denom_coeff) * other.numer_),
+               static_cast<DenominatorType>(denom_ * other_denom_coeff)}
+                       .reduction();
 }
 template <std::signed_integral T>
 constexpr auto Rational<T>::operator-=(const Rational& other) noexcept -> Rational&
@@ -65,7 +86,7 @@ constexpr auto Rational<T>::operator-=(const Rational& other) noexcept -> Ration
 template <std::signed_integral T>
 constexpr auto Rational<T>::operator*=(const Rational& other) noexcept -> Rational&
 {
-    return *this = Rational{static_cast<NumeratorType>(numer_ * other.numer_), static_cast<DenominatorType>(denom_ * other.denom_)};
+    return *this = Rational{simple_copy_, static_cast<NumeratorType>(numer_ * other.numer_), static_cast<DenominatorType>(denom_ * other.denom_)}.reduction();
 }
 template <std::signed_integral T>
 constexpr auto Rational<T>::operator/=(const Rational& other) -> Rational&
@@ -87,7 +108,7 @@ constexpr auto Rational<T>::operator-=(T other) noexcept -> Rational&
 template <std::signed_integral T>
 constexpr auto Rational<T>::operator*=(T other) noexcept -> Rational&
 {
-    return *this = Rational{static_cast<NumeratorType>(numer_ * other), denom_};
+    return *this = Rational{simple_copy_, static_cast<NumeratorType>(numer_ * other), denom_}.reduction();
 }
 template <std::signed_integral T>
 constexpr auto Rational<T>::operator/=(T other) -> Rational&

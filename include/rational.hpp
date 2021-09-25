@@ -1,6 +1,7 @@
 #pragma once
 
 #include <concepts>
+#include <functional>
 #include <ratio>
 #include <type_traits>
 
@@ -23,16 +24,16 @@ struct Rational {
     template <class U>
     explicit constexpr operator U() const noexcept;
     template <std::signed_integral U>
-    requires std::convertible_to<T, U> constexpr operator Rational<U>() const noexcept
+    requires(sizeof(T) <= sizeof(U)) constexpr operator Rational<U>() const noexcept
     {
         using ResultType = Rational<U>;
-        return ResultType(static_cast<ResultType::NumeratorType>(numer_), static_cast<ResultType::DenominatorType>(denom_));
+        return ResultType{simple_copy_, numer_, denom_};
     }
     template <std::signed_integral U>
-    requires (!std::convertible_to<T, U>) constexpr explicit operator Rational<U>() const noexcept
+    requires(sizeof(T) > sizeof(U)) constexpr explicit operator Rational<U>() const noexcept
     {
         using ResultType = Rational<U>;
-        return ResultType(static_cast<ResultType::NumeratorType>(numer_), static_cast<ResultType::DenominatorType>(denom_));
+        return ResultType{static_cast<ResultType::NumeratorType>(numer_), static_cast<ResultType::DenominatorType>(denom_)};
     }
 
     constexpr Rational operator+() const noexcept;
@@ -50,8 +51,18 @@ struct Rational {
     constexpr Rational& operator/=(T);
 
 private:
+    template <std::signed_integral U>
+    friend class Rational;
+
     NumeratorType numer_;
     DenominatorType denom_;
+
+    constexpr const Rational& check_zero_denominator() const;
+    constexpr Rational& reduction() noexcept;
+
+    using SimpleCopy = decltype(std::placeholders::_1);
+    constexpr static SimpleCopy simple_copy_{};
+    explicit constexpr Rational(SimpleCopy, NumeratorType, DenominatorType);
 };
 
 template <std::signed_integral T, std::signed_integral U>
