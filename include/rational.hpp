@@ -12,6 +12,8 @@ struct Rational {
 
     explicit constexpr Rational(NumeratorType, DenominatorType = 1);
     explicit constexpr Rational(NumeratorType, NumeratorType);
+    template <intmax_t N, intmax_t D>
+    explicit constexpr Rational(std::ratio<N, D>);
 
     constexpr Rational(const Rational&) noexcept = default;
     constexpr Rational(Rational&&) noexcept = default;
@@ -88,4 +90,23 @@ requires std::common_with<T, U> constexpr Rational<std::common_type_t<T, U>> ope
 template <std::signed_integral T, std::signed_integral U>
 requires std::common_with<T, U> constexpr Rational<std::common_type_t<T, U>> operator/(const Rational<T>&, const Rational<U>&);
 
+struct ratio_impl {
+    template <std::signed_integral T>
+    constexpr ratio_impl(const Rational<T>& r) : n{r.numer()}, d{r.denom()}
+    {
+    }
+    const Rational<intmax_t>::NumeratorType n;
+    const Rational<intmax_t>::DenominatorType d;
+};
+template <ratio_impl r>
+using ratio = std::ratio<r.n, r.d>;
+
 #include "rational.ipp"
+
+/*
+// below can complile
+
+using my_ratio = ratio<Rational{1, 1000}>;
+static_assert(std::is_same_v<my_ratio, std::ratio<1, 1000>>);
+static_assert(std::is_same_v<std::ratio<1, 1000>, ratio<Rational{std::ratio<1, 1000>{}}>>);
+*/

@@ -36,10 +36,19 @@ constexpr Rational<T>::Rational(NumeratorType numer, NumeratorType denom)
 {
 }
 template <std::signed_integral T>
+template <intmax_t N, intmax_t D>
+constexpr Rational<T>::Rational(std::ratio<N, D>)
+    : Rational{simple_copy_, static_cast<NumeratorType>(N), static_cast<DenominatorType>(D)}
+{
+}
+template <std::signed_integral T>
 constexpr Rational<T>::Rational(SimpleCopy, NumeratorType numer, DenominatorType denom)
     : numer_{numer}, denom_{denom}
 {
 }
+
+template <intmax_t N, intmax_t D>
+Rational(std::ratio<N, D>) -> Rational<intmax_t>;
 
 template <std::signed_integral T>
 template <class U>
