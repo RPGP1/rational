@@ -135,4 +135,36 @@ TEST_CASE("binary_ops")
     REQUIRE(Rational{-1, 4} / Rational{-3, 2} == Rational{1, 6});
 
     REQUIRE_THROWS(Rational{1} / Rational{0});
+
+    REQUIRE(Rational{1, 3} + 1 == Rational{4, 3});
+    REQUIRE(Rational{-1, 3} + 1 == Rational{2, 3});
+    REQUIRE(1 + Rational{1, 3} == Rational{4, 3});
+    REQUIRE(1 + Rational{-1, 3} == Rational{2, 3});
+
+    REQUIRE(Rational{1, 2} - 1 == Rational{-1, 2});
+    REQUIRE(Rational{-1, 2} - 1 == Rational{-3, 2});
+    REQUIRE(1 - Rational{1, 2} == Rational{1, 2});
+    REQUIRE(1 - Rational{-1, 2} == Rational{3, 2});
+
+    REQUIRE(Rational{1, 4} * 2 == Rational{1, 2});
+    REQUIRE(Rational{-1, 4} * 2 == Rational{-1, 2});
+    REQUIRE(Rational{1, 4} * -2 == Rational{-1, 2});
+    REQUIRE(Rational{-1, 4} * -2 == Rational{1, 2});
+    REQUIRE(2 * Rational{1, 4} == Rational{1, 2});
+    REQUIRE(2 * Rational{-1, 4} == Rational{-1, 2});
+    REQUIRE(-2 * Rational{1, 4} == Rational{-1, 2});
+    REQUIRE(-2 * Rational{-1, 4} == Rational{1, 2});
+
+    REQUIRE(Rational{9, 4} / 6 == Rational{3, 8});
+    REQUIRE(Rational{-9, 4} / 6 == Rational{-3, 8});
+    REQUIRE(Rational{9, 4} / -6 == Rational{-3, 8});
+    REQUIRE(Rational{-9, 4} / -6 == Rational{3, 8});
+    REQUIRE(6 / Rational{9, 4} == Rational{8, 3});
+    REQUIRE(6 / Rational{-9, 4} == Rational{-8, 3});
+    REQUIRE(-6 / Rational{9, 4} == Rational{-8, 3});
+    REQUIRE(-6 / Rational{-9, 4} == Rational{8, 3});
 }
+
+using my_ratio = ratio<Rational{1, 1000}>;
+static_assert(std::is_same_v<my_ratio, std::ratio<1, 1000>>);
+static_assert(std::is_same_v<std::ratio<1, 1000>, ratio<Rational{std::ratio<1, 1000>{}}>>);

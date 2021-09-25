@@ -178,3 +178,45 @@ requires std::common_with<T, U> constexpr Rational<std::common_type_t<T, U>> ope
 {
     return Rational<std::common_type_t<T, U>>{lhs} /= rhs;
 }
+
+template <std::signed_integral T, std::signed_integral U>
+requires std::common_with<T, U> constexpr Rational<std::common_type_t<T, U>> operator+(const Rational<T>& lhs, U rhs) noexcept
+{
+    return Rational<std::common_type_t<T, U>>{lhs} += rhs;
+}
+template <std::signed_integral T, std::signed_integral U>
+requires std::common_with<T, U> constexpr Rational<std::common_type_t<T, U>> operator-(const Rational<T>& lhs, U rhs) noexcept
+{
+    return Rational<std::common_type_t<T, U>>{lhs} -= rhs;
+}
+template <std::signed_integral T, std::signed_integral U>
+requires std::common_with<T, U> constexpr Rational<std::common_type_t<T, U>> operator*(const Rational<T>& lhs, U rhs) noexcept
+{
+    return Rational<std::common_type_t<T, U>>{lhs} *= rhs;
+}
+template <std::signed_integral T, std::signed_integral U>
+requires std::common_with<T, U> constexpr Rational<std::common_type_t<T, U>> operator/(const Rational<T>& lhs, U rhs)
+{
+    return Rational<std::common_type_t<T, U>>{lhs} /= rhs;
+}
+
+template <std::signed_integral T, std::signed_integral U>
+requires std::common_with<T, U> constexpr Rational<std::common_type_t<T, U>> operator+(T lhs, const Rational<U>& rhs) noexcept
+{
+    return rhs + lhs;
+}
+template <std::signed_integral T, std::signed_integral U>
+requires std::common_with<T, U> constexpr Rational<std::common_type_t<T, U>> operator-(T lhs, const Rational<U>& rhs) noexcept
+{
+    return lhs + (-rhs);
+}
+template <std::signed_integral T, std::signed_integral U>
+requires std::common_with<T, U> constexpr Rational<std::common_type_t<T, U>> operator*(T lhs, const Rational<U>& rhs) noexcept
+{
+    return rhs * lhs;
+}
+template <std::signed_integral T, std::signed_integral U>
+requires std::common_with<T, U> constexpr Rational<std::common_type_t<T, U>> operator/(T lhs, const Rational<U>& rhs)
+{
+    return lhs * rhs.inverse();
+}

@@ -90,6 +90,26 @@ requires std::common_with<T, U> constexpr Rational<std::common_type_t<T, U>> ope
 template <std::signed_integral T, std::signed_integral U>
 requires std::common_with<T, U> constexpr Rational<std::common_type_t<T, U>> operator/(const Rational<T>&, const Rational<U>&);
 
+template <std::signed_integral T, std::signed_integral U>
+requires std::common_with<T, U> constexpr Rational<std::common_type_t<T, U>> operator+(const Rational<T>&, U) noexcept;
+template <std::signed_integral T, std::signed_integral U>
+requires std::common_with<T, U> constexpr Rational<std::common_type_t<T, U>> operator-(const Rational<T>&, U) noexcept;
+template <std::signed_integral T, std::signed_integral U>
+requires std::common_with<T, U> constexpr Rational<std::common_type_t<T, U>> operator*(const Rational<T>&, U) noexcept;
+template <std::signed_integral T, std::signed_integral U>
+requires std::common_with<T, U> constexpr Rational<std::common_type_t<T, U>> operator/(const Rational<T>&, U);
+
+template <std::signed_integral T, std::signed_integral U>
+requires std::common_with<T, U> constexpr Rational<std::common_type_t<T, U>> operator+(T, const Rational<U>&) noexcept;
+template <std::signed_integral T, std::signed_integral U>
+requires std::common_with<T, U> constexpr Rational<std::common_type_t<T, U>> operator-(T, const Rational<U>&) noexcept;
+template <std::signed_integral T, std::signed_integral U>
+requires std::common_with<T, U> constexpr Rational<std::common_type_t<T, U>> operator*(T, const Rational<U>&) noexcept;
+template <std::signed_integral T, std::signed_integral U>
+requires std::common_with<T, U> constexpr Rational<std::common_type_t<T, U>> operator/(T, const Rational<U>&);
+
+namespace
+{
 struct ratio_impl {
     template <std::signed_integral T>
     constexpr ratio_impl(const Rational<T>& r) : n{r.numer()}, d{r.denom()}
@@ -98,15 +118,9 @@ struct ratio_impl {
     const Rational<intmax_t>::NumeratorType n;
     const Rational<intmax_t>::DenominatorType d;
 };
+}  // namespace
+
 template <ratio_impl r>
 using ratio = std::ratio<r.n, r.d>;
 
 #include "rational.ipp"
-
-/*
-// below can complile
-
-using my_ratio = ratio<Rational{1, 1000}>;
-static_assert(std::is_same_v<my_ratio, std::ratio<1, 1000>>);
-static_assert(std::is_same_v<std::ratio<1, 1000>, ratio<Rational{std::ratio<1, 1000>{}}>>);
-*/
